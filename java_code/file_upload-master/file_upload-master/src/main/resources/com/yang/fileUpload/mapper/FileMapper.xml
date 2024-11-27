@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yang.fileUpload.mapper.FileMapper">
+    <insert id="createTable" parameterType="map">
+        <!-- 动态 SQL 语法 -->
+        CREATE TABLE ${tableName} (
+        <foreach collection="colDefinition" index="key" item="val" separator=",">
+            ${key} ${val}
+        </foreach>
+        )
+    </insert>
+    <insert id="loadData">
+        LOAD DATA LOCAL INFILE "${filePath}"
+        INTO TABLE ${tableName}
+        FIELDS TERMINATED BY ',' ENCLOSED BY '"'
+        LINES TERMINATED BY '\n'
+        IGNORE 1 LINES
+    </insert>
+    <insert id="batchInsert">
+        INSERT INTO ${tableName}
+        VALUES
+        <foreach collection="rowData" item="row" separator=",">
+            <foreach collection="row" item="value" open="(" close=")" separator=",">
+                <choose>
+                    <when test="value == null or value == ''">
+                        NULL
+                    </when>
+                    <otherwise>
+                        #{value}
+                    </otherwise>
+                </choose>
+            </foreach>
+        </foreach>
+    </insert>
+    <delete id="deleteTable">
+        drop table if exists ${tableName}
+    </delete>
+</mapper>
